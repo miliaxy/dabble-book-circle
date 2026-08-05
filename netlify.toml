@@ -3,6 +3,21 @@
   publish = "dist"
 
 [[redirects]]
+  from = "/books/assets/*"
+  to = "/assets/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/books/icon.svg"
+  to = "/icon.svg"
+  status = 200
+
+[[redirects]]
+  from = "/books/manifest.webmanifest"
+  to = "/manifest.webmanifest"
+  status = 200
+
+[[redirects]]
   from = "/books"
   to = "/index.html"
   status = 200
