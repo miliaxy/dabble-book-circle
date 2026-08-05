@@ -48,7 +48,7 @@ export function Browse() {
   return (
     <div className="screen browse-screen">
       <header className="screen-heading browse-heading">
-        <div><span className="browse-circle-mobile"><strong>{state.community.name}</strong><small>{state.community.memberCount} families</small></span><h1>Good evening, Priya.</h1><p>What would your family like to read next?</p></div>
+        <div><span className="browse-circle-mobile"><strong>{state.community.name}</strong><small>{state.community.memberCount} families</small></span><h1>Good evening, Arnaa.</h1><p>What would your family like to read next?</p></div>
       </header>
 
       {currentBorrow && currentBorrowBook && (

@@ -1,6 +1,6 @@
 export const DEMO_INVITATION = {
   code: 'DABBLE-DEMO',
-  recipientEmail: 'priya.sharma@example.test',
+  recipientEmail: 'arnaa.aggarwal@example.test',
   circle: {
     id: 'circle-gurgaon-demo',
     name: 'Gurgaon Founding Circle',
