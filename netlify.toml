@@ -1,0 +1,21 @@
+[build]
+  command = "pnpm build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/books"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/books/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/books/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self), microphone=(), geolocation=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://www.googleapis.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
