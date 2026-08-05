@@ -16,7 +16,8 @@ This repository currently contains the interactive frontend foundation:
 - seven-day loans beginning only after confirmed receipt;
 - borrower return plus lender return confirmation;
 - structured family-level return feedback; and
-- optional WhatsApp sharing limited to an active matched handover or loan.
+- optional WhatsApp sharing limited to an active matched handover or loan; and
+- a circle-admin preview for email-bound invitations, access requests, and member management.
 
 All included people, communities, contact details, bookshelves, and loan activity are fictional preview data. Do not add real family or school data to source code or fixtures.
 
@@ -56,7 +57,7 @@ pnpm test
 pnpm build
 ```
 
-The borrowing-rule tests cover queue order, receipt-based due dates, lender-confirmed returns, and accepting the first waiting request.
+The automated tests cover queue order, receipt-based due dates, lender-confirmed returns, request declines, invitation reissuing, access approvals, and administrator authorization.
 
 ## Production boundary
 
@@ -73,6 +74,6 @@ The foundation includes:
 - a private notification queue ready for a later server-side delivery job; and
 - audit data ready for a later administrator path for membership and return issues.
 
-Notification delivery and administrator screens are not yet implemented.
+Notification delivery and production administrator data wiring are not yet implemented. The administrator interface currently runs against fictional preview data.
 
 The production site can remain an independent Netlify application and be proxied behind `/books/*` from the existing DabbleNow site. The existing DabbleNow activity site should only receive the navigation/cross-promotion link and routing rule after the private backend and staging review are complete.
