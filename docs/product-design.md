@@ -112,9 +112,12 @@ The interface shares Dabble's friendly, optimistic visual language while giving 
 
 - Lead with a personalised parent greeting and a compact borrowing-due card when relevant.
 - Search supports title, author, series, and topic; filters support age and immediate availability.
-- Book cards show cover, title, author, series name and book number when applicable, age, language, and circulation state.
-- Book details show the series when applicable, sharing family, condition, description, Goodreads link, availability, and request action.
-- A family cannot request its own book or enter the same queue twice.
+- Identical books owned by different families appear as one catalog title card. The card shows the total copy count and how many copies are currently available.
+- Exact ISBN is the primary grouping key. When ISBN is absent, normalized title and author provide a conservative preview fallback; production should use a canonical title record reviewed during book entry.
+- Book cards show cover, title, author, series name and book number when applicable, age, language, aggregate circulation state, and copy availability.
+- Book details show shared title metadata followed by every physical copy’s sharing family, condition, circulation state, and independent queue so the borrower can choose a copy.
+- Requests, queues, handovers, loans, returns, and condition accountability remain attached to the selected physical copy.
+- A family cannot request its own book, enter the same copy queue twice, or request or borrow multiple copies of the same title at once.
 
 ### My Books
 

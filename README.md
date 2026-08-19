@@ -9,7 +9,7 @@ This repository currently contains the interactive frontend foundation:
 - public Book Circle introduction and Dabble Activities cross-promotion;
 - invite-only and returning-parent access previews;
 - parent and family-level identity only—no child accounts;
-- private-circle book browsing, series labels/search, filters, and Goodreads links;
+- private-circle book browsing with grouped physical copies, series labels/search, filters, and Goodreads links;
 - photo-first English/Hindi cover recognition and ISBN-based metadata lookup;
 - fair request queues and lender acceptance;
 - handover and borrower receipt confirmation;
@@ -57,7 +57,7 @@ pnpm test
 pnpm build
 ```
 
-The automated tests cover book lookup, preview-data consistency, queue order, receipt-based due dates, lender-confirmed returns, request declines, invitation reissuing, access approvals, and administrator authorization.
+The automated tests cover book lookup, duplicate-copy grouping, cross-copy request protection, preview-data consistency, queue order, receipt-based due dates, lender-confirmed returns, request declines, invitation reissuing, access approvals, and administrator authorization.
 
 ## Project working agreements
 

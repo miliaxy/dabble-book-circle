@@ -26,13 +26,14 @@ function readInitialState() {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (!stored) return createDemoState();
     const parsed = JSON.parse(stored) as AppState;
-    if (parsed.version === 5) return parsed;
-    if (parsed.version === 2 || parsed.version === 3 || parsed.version === 4) {
+    if (parsed.version === 6) return parsed;
+    if ([2, 3, 4, 5].includes(parsed.version)) {
       const upgraded = createDemoState();
       const upgradedBooks = parsed.books.map((book) => {
         const reference = upgraded.books.find((candidate) => candidate.id === book.id);
         return {
           ...book,
+          isbn: book.isbn ?? reference?.isbn,
           seriesName: book.seriesName ?? reference?.seriesName,
           seriesNumber: book.seriesNumber ?? reference?.seriesNumber,
         };
@@ -40,7 +41,7 @@ function readInitialState() {
       return {
         ...upgraded,
         ...parsed,
-        version: 5,
+        version: 6,
         community: {
           ...parsed.community,
           role: parsed.community.role ?? 'admin' as const,

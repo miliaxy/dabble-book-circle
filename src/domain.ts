@@ -55,6 +55,15 @@ export function displayStatus(
   return 'available';
 }
 
+export function groupDisplayStatus(books: BookCopy[], requests: BorrowRequest[], loans: Loan[]): BookDisplayStatus {
+  const statuses = books.map((book) => displayStatus(book, requests, loans));
+  if (statuses.includes('available')) return 'available';
+  if (statuses.includes('queued')) return 'queued';
+  if (statuses.includes('reserved')) return 'reserved';
+  if (statuses.includes('borrowed')) return 'borrowed';
+  return 'paused';
+}
+
 export function addSevenDays(isoDate: string) {
   return new Date(new Date(isoDate).getTime() + 7 * DAY).toISOString();
 }
@@ -77,6 +86,24 @@ export function bookMatchesQuery(
     .join(' ')
     .toLocaleLowerCase()
     .includes(normalized);
+}
+
+function normalizedBookIdentity(value: string) {
+  return value
+    .normalize('NFKD')
+    .toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+}
+
+export function bookGroupKey(book: Pick<BookCopy, 'isbn' | 'title' | 'author'>) {
+  const isbn = book.isbn?.replace(/[^0-9X]/gi, '').toUpperCase();
+  if (isbn) return `isbn:${isbn}`;
+  return `book:${normalizedBookIdentity(book.title)}|${normalizedBookIdentity(book.author)}`;
+}
+
+export function sameBookGroup(first: Pick<BookCopy, 'isbn' | 'title' | 'author'>, second: Pick<BookCopy, 'isbn' | 'title' | 'author'>) {
+  return bookGroupKey(first) === bookGroupKey(second);
 }
 
 export function formatDateIST(isoDate?: string) {
@@ -121,14 +148,20 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         ),
       };
     case 'REQUEST_BOOK':
-      if (
-        requestForFamily(
-          state.requests,
-          action.request.bookId,
-          action.request.borrowerFamilyId,
-        ) || activeLoanForBook(state.loans, action.request.bookId)?.borrowerFamilyId === action.request.borrowerFamilyId
-      ) {
-        return state;
+      {
+        const requestedBook = state.books.find((book) => book.id === action.request.bookId);
+        const matchingBookIds = requestedBook
+          ? new Set(state.books.filter((book) => sameBookGroup(book, requestedBook)).map((book) => book.id))
+          : new Set([action.request.bookId]);
+        const hasMatchingRequest = state.requests.some((request) =>
+          matchingBookIds.has(request.bookId)
+          && request.borrowerFamilyId === action.request.borrowerFamilyId
+          && request.status === 'waiting');
+        const hasMatchingLoan = state.loans.some((loan) =>
+          matchingBookIds.has(loan.bookId)
+          && loan.borrowerFamilyId === action.request.borrowerFamilyId
+          && ACTIVE_LOAN_STATES.has(loan.status));
+        if (hasMatchingRequest || hasMatchingLoan) return state;
       }
       return { ...state, requests: [...state.requests, action.request] };
     case 'CANCEL_REQUEST':

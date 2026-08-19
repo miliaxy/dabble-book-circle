@@ -280,11 +280,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .book-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
 .book-card-copy { display: block; padding: 14px 2px 3px; }
 .book-card-topline { min-height: 23px; display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 8px; }
-.queue-count { color: var(--muted); font-size: 8px; font-weight: 700; }
-.book-card-copy > strong, .book-author, .book-series, .book-meta { display: block; }
+.queue-count, .copy-count { color: var(--muted); font-size: 8px; font-weight: 700; }
+.copy-count { color: var(--teal-dark); }
+.book-card-copy > strong, .book-author, .book-series, .book-copy-summary, .book-meta { display: block; }
 .book-card-copy > strong { min-height: 38px; overflow: hidden; color: var(--slate); font-family: 'Nunito', sans-serif; font-size: 14px; line-height: 1.25; }
 .book-author { margin-top: 3px; overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .book-series { width: fit-content; max-width: 100%; margin-top: 7px; overflow: hidden; padding: 4px 7px; border-radius: 999px; color: var(--purple); background: var(--purple-light); font-size: 8px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.book-copy-summary { margin-top: 7px; color: var(--teal-dark); font-size: 9px; font-weight: 800; }
 .book-meta { margin-top: 9px; color: #91a0ad; font-size: 9px; }
 .screen > .cross-promo-compact { display: none; margin: 45px 0 0; }
 .cross-promo-compact { margin: 45px 0 0; padding: 18px 21px; }
@@ -326,6 +328,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .detail-action-panel strong { font-size: 11px; }
 .detail-action-panel p { margin: 2px 0 0; color: var(--muted); font-size: 9px; }
 .detail-action-panel .button { min-height: 38px; flex: 0 0 auto; padding: 0 14px; font-size: 10px; }
+.copy-options { margin-top: 17px; padding-top: 15px; border-top: 1px solid var(--line); }
+.copy-options-heading strong { font-size: 12px; }
+.copy-options-heading p { margin: 3px 0 0; color: var(--muted); font-size: 9px; }
+.copy-option { display: flex; align-items: center; gap: 10px; margin-top: 9px; padding: 11px; border: 1px solid var(--line); border-radius: 13px; background: #f8fafb; }
+.copy-option .owner-avatar { flex: 0 0 auto; }
+.copy-option-copy { min-width: 0; flex: 1; }
+.copy-option-copy strong, .copy-option-copy span, .copy-option-copy small { display: block; }
+.copy-option-copy strong { font-size: 10px; }
+.copy-option-copy span { margin-top: 2px; color: var(--muted); font-size: 9px; }
+.copy-option-copy small { margin-top: 4px; color: var(--purple); font-size: 8px; font-weight: 750; }
+.copy-option-action { display: grid; flex: 0 0 auto; justify-items: end; gap: 7px; }
+.copy-option-action .button { min-height: 34px; padding: 0 11px; font-size: 9px; }
+.copy-unavailable-note { max-width: 92px; color: var(--muted); font-size: 8px; font-weight: 700; text-align: right; }
+.copy-options-note { margin: 10px 0 0; color: #91a0ad; font-size: 8px; }
 .contact-privacy { display: flex; align-items: center; gap: 6px; margin: 12px 0 0; color: #91a0ad; font-size: 8px; }
 
 /* My books */
@@ -712,6 +728,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .detail-list { grid-template-columns: 1fr 1fr; }
   .detail-action-panel { align-items: stretch; flex-direction: column; }
   .detail-action-panel .button { width: 100%; }
+  .copy-option { align-items: flex-start; flex-wrap: wrap; }
+  .copy-option-copy { min-width: calc(100% - 42px); }
+  .copy-option-action { width: 100%; display: flex; align-items: center; justify-content: space-between; padding-left: 42px; }
+  .copy-unavailable-note { max-width: 150px; }
   .reliability-mini { display: none; }
   .summary-grid strong { font-size: 18px; }
   .summary-grid small { font-size: 8px; }

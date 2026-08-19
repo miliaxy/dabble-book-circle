@@ -4,10 +4,13 @@ import {
   activeLoanForBook,
   addSevenDays,
   appReducer,
+  bookGroupKey,
   bookMatchesQuery,
   bookSeriesLabel,
   displayStatus,
+  groupDisplayStatus,
   queuePosition,
+  sameBookGroup,
   waitingRequestsForBook,
 } from './domain';
 
@@ -31,7 +34,7 @@ describe('borrowing rules', () => {
     const completedBorrowing = state.loans.filter((loan) =>
       loan.borrowerFamilyId === state.family.id && loan.status === 'completed');
 
-    expect(state.version).toBe(5);
+    expect(state.version).toBe(6);
     expect(state.circleMembers).toHaveLength(state.community.memberCount);
     expect(state.books.find((book) => book.id === 'book-geronimo')).toMatchObject({
       seriesName: 'Geronimo Stilton',
@@ -42,6 +45,45 @@ describe('borrowing rules', () => {
       state.books.some((book) => book.id === loan.bookId)
       && Boolean(loan.borrowerMarkedReturnedAt)
       && Boolean(loan.lenderConfirmedReturnedAt))).toBe(true);
+  });
+
+  it('groups copies by exact ISBN and falls back to normalized title and author', () => {
+    const state = createDemoState(NOW);
+    const wildRobotCopies = state.books.filter((book) => book.title === 'The Wild Robot');
+    expect(wildRobotCopies).toHaveLength(3);
+    expect(new Set(wildRobotCopies.map(bookGroupKey)).size).toBe(1);
+    expect(sameBookGroup(
+      { title: '  Matilda ', author: 'Roald Dahl', isbn: undefined },
+      { title: 'matilda', author: 'ROALD  DAHL', isbn: undefined },
+    )).toBe(true);
+  });
+
+  it('prevents a family from joining queues for multiple copies of the same book', () => {
+    const state = createDemoState(NOW);
+    const firstRequest = {
+      id: 'request-wild-robot-one',
+      bookId: 'book-wild-robot',
+      borrowerFamilyId: state.family.id,
+      borrowerName: state.family.displayName,
+      requestedAt: NOW.toISOString(),
+      status: 'waiting' as const,
+    };
+    const afterFirst = appReducer(state, { type: 'REQUEST_BOOK', request: firstRequest });
+    const afterSecond = appReducer(afterFirst, {
+      type: 'REQUEST_BOOK',
+      request: { ...firstRequest, id: 'request-wild-robot-two', bookId: 'book-wild-robot-mehta' },
+    });
+
+    expect(afterFirst.requests).toHaveLength(state.requests.length + 1);
+    expect(afterSecond).toBe(afterFirst);
+  });
+
+  it('shows a grouped title as available when at least one physical copy is available', () => {
+    const state = createDemoState(NOW);
+    const wildRobotCopies = state.books.filter((book) => book.title === 'The Wild Robot');
+
+    expect(groupDisplayStatus(wildRobotCopies, state.requests, state.loans)).toBe('available');
+    expect(wildRobotCopies.filter((book) => displayStatus(book, state.requests, state.loans) === 'available')).toHaveLength(2);
   });
 
   it('calculates a family queue position by request time', () => {
