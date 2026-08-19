@@ -8,6 +8,11 @@
   status = 200
 
 [[redirects]]
+  from = "/books/ocr/*"
+  to = "/ocr/:splat"
+  status = 200
+
+[[redirects]]
   from = "/books/icon.svg"
   to = "/icon.svg"
   status = 200
