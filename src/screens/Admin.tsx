@@ -9,6 +9,7 @@ export function Admin() {
   const [creatingInvitation, setCreatingInvitation] = useState(false);
   const [decliningRequest, setDecliningRequest] = useState<CircleJoinRequest | null>(null);
   const [copiedInvitationId, setCopiedInvitationId] = useState<string | null>(null);
+  const [memberQuery, setMemberQuery] = useState('');
   const pendingRequests = state.circleJoinRequests.filter((request) => request.status === 'pending');
   const activeLoans = state.loans.filter((loan) => !['completed', 'feedback_pending'].includes(loan.status)).length;
   const listedBooks = state.books.length;
@@ -16,6 +17,12 @@ export function Admin() {
     () => [...state.circleInvitations].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [state.circleInvitations],
   );
+  const visibleMembers = useMemo(() => {
+    const query = memberQuery.trim().toLocaleLowerCase();
+    return [...state.circleMembers]
+      .sort((a, b) => a.familyName.localeCompare(b.familyName))
+      .filter((member) => !query || `${member.familyName} ${member.parentName} ${member.email}`.toLocaleLowerCase().includes(query));
+  }, [memberQuery, state.circleMembers]);
 
   function approveRequest(request: CircleJoinRequest) {
     dispatch({
@@ -85,14 +92,15 @@ export function Admin() {
         </section>
 
         <section className="admin-section">
-          <div className="section-heading"><div><h2>Recent members</h2><p>Manage family access to this circle.</p></div><span className="admin-section-count">{state.community.memberCount} total</span></div>
-          <div className="admin-member-list">{state.circleMembers.map((member) => (
+          <div className="section-heading"><div><h2>All circle families</h2><p>View every approved family and manage their access.</p></div><span className="admin-section-count">{state.circleMembers.length} total</span></div>
+          <label className="admin-member-search"><span>Search families</span><input type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="Family, parent or email" /></label>
+          <div className="admin-member-list">{visibleMembers.map((member) => (
             <article className="admin-member-row" key={member.id}>
               <span className="admin-family-avatar admin-family-avatar-small">{member.parentName.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span>
               <div><strong>{member.familyName}</strong><span>{member.parentName} · {member.email}</span><small>{member.booksListed} {member.booksListed === 1 ? 'book' : 'books'} · {member.completedLoans} completed {member.completedLoans === 1 ? 'loan' : 'loans'}</small></div>
               <div className="admin-member-meta"><span className={`admin-status admin-status-${member.status}`}>{member.role === 'admin' ? 'Admin' : member.status}</span>{member.role !== 'admin' && <button type="button" onClick={() => dispatch({ type: 'SET_CIRCLE_MEMBER_STATUS', memberId: member.id, status: member.status === 'active' ? 'suspended' : 'active' })}>{member.status === 'active' ? 'Suspend' : 'Reinstate'}</button>}</div>
             </article>
-          ))}</div>
+          ))}{visibleMembers.length === 0 && <div className="admin-empty-row"><span>⌕</span><div><strong>No families found</strong><p>Try a different family or parent name.</p></div></div>}</div>
         </section>
       </div>
 

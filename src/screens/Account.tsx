@@ -5,6 +5,7 @@ export function Account() {
   const { state, dispatch, resetDemo } = useApp();
   const navigate = useNavigate();
   const successRate = state.family.successfulLoans === 0 ? 0 : Math.round((state.family.onTimeLoans / state.family.successfulLoans) * 100);
+  const initials = state.family.parentName.split(/\s+/).map((part) => part[0]).slice(0, 2).join('').toUpperCase();
 
   function reset() {
     if (window.confirm('Reset all preview books, requests and loan actions?')) {
@@ -20,11 +21,11 @@ export function Account() {
       <section className="account-panel">
         <section className="account-record" aria-label="Family borrowing record">
           <div className="account-record-copy"><span>Family borrowing record</span><h2>Reliable circle member</h2><p>A private record based on completed loans and timely returns.</p></div>
-          <div className="account-record-stats"><span><strong>{state.family.successfulLoans}</strong><small>Completed loans</small></span><span><strong>{state.family.onTimeLoans}</strong><small>On-time returns</small></span><span><strong>{successRate}%</strong><small>On-time rate</small></span></div>
+          <div className="account-record-actions"><div className="account-record-stats"><span><strong>{state.family.successfulLoans}</strong><small>Completed loans</small></span><span><strong>{state.family.onTimeLoans}</strong><small>On-time returns</small></span><span><strong>{successRate}%</strong><small>On-time rate</small></span></div><button type="button" onClick={() => navigate('/books/loans')}>View completed loan records →</button></div>
         </section>
 
         <section className="account-profile-section">
-          <span className="profile-avatar">PS</span>
+          <span className="profile-avatar">{initials}</span>
           <div className="profile-copy"><h2>{state.family.parentName}</h2><p>{state.family.displayName}</p><span>{state.family.email}</span></div>
           <span className="verified-badge">✓ Invited parent</span>
         </section>

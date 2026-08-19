@@ -26,17 +26,32 @@ function readInitialState() {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (!stored) return createDemoState();
     const parsed = JSON.parse(stored) as AppState;
-    if (parsed.version === 3) return parsed;
-    if (parsed.version === 2) {
+    if (parsed.version === 4) return parsed;
+    if (parsed.version === 2 || parsed.version === 3) {
       const upgraded = createDemoState();
       return {
         ...upgraded,
         ...parsed,
-        version: 3,
-        community: { ...parsed.community, role: 'admin' as const },
-        circleInvitations: upgraded.circleInvitations,
-        circleMembers: upgraded.circleMembers,
-        circleJoinRequests: upgraded.circleJoinRequests,
+        version: 4,
+        community: {
+          ...parsed.community,
+          role: parsed.community.role ?? 'admin' as const,
+          memberCount: Math.max(parsed.community.memberCount ?? 0, upgraded.community.memberCount),
+        },
+        books: [
+          ...parsed.books,
+          ...upgraded.books.filter((book) => !parsed.books.some((existing) => existing.id === book.id)),
+        ],
+        loans: [
+          ...parsed.loans,
+          ...upgraded.loans.filter((loan) => !parsed.loans.some((existing) => existing.id === loan.id)),
+        ],
+        circleInvitations: parsed.circleInvitations ?? upgraded.circleInvitations,
+        circleMembers: [
+          ...(parsed.circleMembers ?? []),
+          ...upgraded.circleMembers.filter((member) => !(parsed.circleMembers ?? []).some((existing) => existing.id === member.id)),
+        ],
+        circleJoinRequests: parsed.circleJoinRequests ?? upgraded.circleJoinRequests,
       };
     }
     return createDemoState();

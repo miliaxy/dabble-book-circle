@@ -30,7 +30,9 @@ export function Loans() {
     [state.family.id, state.loans],
   );
   const activeLoans = borrowerLoans.filter((loan) => !['completed', 'cancelled', 'feedback_pending'].includes(loan.status));
-  const completedLoans = borrowerLoans.filter((loan) => ['completed', 'feedback_pending'].includes(loan.status));
+  const completedLoans = borrowerLoans
+    .filter((loan) => ['completed', 'feedback_pending'].includes(loan.status))
+    .sort((a, b) => (b.lenderConfirmedReturnedAt ?? b.acceptedAt).localeCompare(a.lenderConfirmedReturnedAt ?? a.acceptedAt));
   const waitingRequests = state.requests.filter((request) => request.borrowerFamilyId === state.family.id && request.status === 'waiting');
   const counts: Record<BorrowingFilter, number> = {
     all: activeLoans.length + waitingRequests.length + completedLoans.length,
@@ -81,7 +83,8 @@ function BorrowerLoanCard({ loan, onContact }: { loan: Loan; onContact: () => vo
   return (
     <article className={`loan-card loan-${loan.status}`}>
       <div className="loan-card-main"><BookCover book={book} size="small" /><div className="loan-card-copy"><span className="loan-role">Your family is borrowing</span><h3>{book.title}</h3><p>From {loan.lenderName}</p></div><span className="loan-state">{copy.label}</span></div>
-      <div className="loan-timeline"><span className="timeline-dot active" /><div><strong>{copy.title}</strong><p>{copy.description}</p>{loan.dueAt && <small>{dueLabel(loan.dueAt)} · {formatDateIST(loan.dueAt)}</small>}</div></div>
+      <div className="loan-timeline"><span className="timeline-dot active" /><div><strong>{copy.title}</strong><p>{copy.description}</p>{loan.dueAt && !['completed', 'feedback_pending'].includes(loan.status) && <small>{dueLabel(loan.dueAt)} · {formatDateIST(loan.dueAt)}</small>}</div></div>
+      {['completed', 'feedback_pending'].includes(loan.status) && <details className="loan-return-record"><summary>View return record</summary><dl><div><dt>Borrowed from</dt><dd>{loan.lenderName}</dd></div>{loan.receivedAt && <div><dt>Received</dt><dd>{formatDateIST(loan.receivedAt)}</dd></div>}{loan.dueAt && <div><dt>Due date</dt><dd>{formatDateIST(loan.dueAt)}</dd></div>}{loan.borrowerMarkedReturnedAt && <div><dt>You marked it returned</dt><dd>{formatDateIST(loan.borrowerMarkedReturnedAt)}</dd></div>}{loan.lenderConfirmedReturnedAt && <div><dt>Lender confirmed return</dt><dd>{formatDateIST(loan.lenderConfirmedReturnedAt)}</dd></div>}<div><dt>Loan reference</dt><dd>{loan.id}</dd></div></dl></details>}
       {!['completed', 'feedback_pending'].includes(loan.status) && <div className="loan-actions">
         {state.preferences.shareWhatsappDuringHandover && <button className="button button-quiet button-small" type="button" onClick={onContact}>WhatsApp handover</button>}
         {loan.status === 'awaiting_receipt' && <button className="button button-primary button-small" type="button" onClick={() => dispatch({ type: 'CONFIRM_RECEIVED', loanId: loan.id, now: new Date().toISOString() })}>I received it</button>}
@@ -98,6 +101,6 @@ function borrowerLoanCopy(loan: Loan) {
     case 'borrowed': return { label: 'Borrowed', title: 'Seven-day loan active', description: 'Return the book by the due date and mark it returned.' };
     case 'return_pending': return { label: 'Return pending', title: 'You marked the book returned', description: 'Waiting for the lender to confirm receipt.' };
     case 'feedback_pending': return { label: 'Returned', title: 'Return confirmed', description: 'The lender is completing the private return record.' };
-    default: return { label: 'Completed', title: 'Loan completed', description: 'This book has been returned.' };
+    default: return { label: 'Completed', title: 'Returned and confirmed', description: loan.lenderConfirmedReturnedAt ? `The lender confirmed the return on ${formatDateIST(loan.lenderConfirmedReturnedAt)}.` : 'This book has been returned.' };
   }
 }

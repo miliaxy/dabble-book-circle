@@ -1,6 +1,7 @@
 node_modules/
 .pnpm-store/
 dist/
+public/ocr/
 .DS_Store
 *.local
 .env

@@ -406,7 +406,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .photo-drop strong { font-size: 13px; }
 .photo-drop small { max-width: 150px; margin-top: 5px; color: var(--muted); font-size: 10px; line-height: 1.4; }
 .photo-help { display: flex; gap: 8px; margin-top: 12px; padding: 11px; border-radius: 12px; background: var(--purple-light); color: #64547b; }
+.photo-help > div { flex: 1; }
 .photo-help p { margin: 0; font-size: 9px; line-height: 1.45; }
+.photo-help button { margin-top: 6px; padding: 0; border: 0; color: var(--purple); background: transparent; font: inherit; font-size: 8px; font-weight: 800; text-decoration: underline; cursor: pointer; }
+.photo-help-scanning { background: var(--amber-light); color: #6b5d3e; }
+.photo-help-found { background: var(--teal-light); color: var(--teal-dark); }
 .book-fields label { margin-top: 12px; }
 .book-fields label b { color: var(--peach-dark); }
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -433,6 +437,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .loan-timeline strong { font-size: 10px; }
 .loan-timeline p { margin: 2px 0 0; color: var(--muted); font-size: 9px; }
 .loan-timeline small { display: block; margin-top: 6px; color: var(--purple); font-size: 9px; font-weight: 700; }
+.loan-return-record { margin: 10px 17px 15px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+.loan-return-record summary { color: var(--teal-dark); font-size: 9px; font-weight: 800; cursor: pointer; }
+.loan-return-record dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px 16px; margin: 12px 0 2px; }
+.loan-return-record dl > div { min-width: 0; }
+.loan-return-record dt { color: var(--muted); font-size: 7px; font-weight: 750; text-transform: uppercase; }
+.loan-return-record dd { margin: 2px 0 0; overflow-wrap: anywhere; color: var(--slate); font-size: 9px; font-weight: 700; }
 .loan-actions { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 17px 15px; }
 .queue-row { display: flex; align-items: center; gap: 14px; padding: 14px 17px; border: 1px solid var(--line); border-radius: 17px; background: white; }
 .queue-row .book-cover-small { width: 48px; height: 66px; }
@@ -481,6 +491,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .admin-section .section-heading { margin-bottom: 15px; }
 .admin-section-count { flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; color: var(--purple); background: var(--purple-light); font-size: 8px; font-weight: 800; }
 .admin-request-list, .admin-invitation-list, .admin-member-list { display: grid; gap: 8px; }
+.admin-member-search { display: grid; gap: 5px; margin: -4px 0 12px; color: var(--muted); font-size: 8px; font-weight: 800; }
+.admin-member-search input { width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; color: var(--slate); background: #fbfcfd; font: inherit; font-size: 9px; }
 .admin-request-row { display: flex; align-items: center; gap: 13px; padding: 13px; border: 1px solid #f0ddac; border-radius: 14px; background: #fffcf5; }
 .admin-family-avatar { width: 43px; height: 43px; display: grid; place-items: center; flex: 0 0 43px; border-radius: 13px; color: var(--purple); background: var(--purple-light); font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 900; }
 .admin-family-avatar-small { width: 36px; height: 36px; flex-basis: 36px; border-radius: 11px; font-size: 9px; }
@@ -529,6 +541,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .account-record-copy h2 { margin: 5px 0 2px; font-size: 19px; }
 .account-record-copy p { margin: 0; color: rgba(255,255,255,.75); font-size: 9px; }
 .account-record-stats { display: flex; gap: 28px; }
+.account-record-actions { display: grid; justify-items: end; gap: 9px; }
+.account-record-actions > button { padding: 0; border: 0; color: white; background: transparent; font: inherit; font-size: 8px; font-weight: 800; text-decoration: underline; cursor: pointer; }
 .account-record-stats span { min-width: 74px; }
 .account-record-stats strong, .account-record-stats small { display: block; text-align: center; }
 .account-record-stats strong { font-family: 'Nunito', sans-serif; font-size: 23px; }
@@ -659,6 +673,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .admin-columns { grid-template-columns: 1fr; }
   .account-record { align-items: flex-start; flex-direction: column; }
   .account-record-stats { width: 100%; justify-content: space-between; gap: 8px; }
+  .account-record-actions { width: 100%; justify-items: start; }
 }
 
 @media (max-width: 480px) {

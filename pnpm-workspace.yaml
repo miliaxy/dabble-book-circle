@@ -1,0 +1,4 @@
+allowBuilds:
+  # The published browser bundles need no install-time build. The package's
+  # postinstall script only displays an optional funding message.
+  tesseract.js: false

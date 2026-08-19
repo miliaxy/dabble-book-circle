@@ -12,6 +12,20 @@ import {
 const NOW = new Date('2026-08-05T12:00:00.000Z');
 
 describe('borrowing rules', () => {
+  it('keeps the preview counts backed by complete member and borrowing records', () => {
+    const state = createDemoState(NOW);
+    const completedBorrowing = state.loans.filter((loan) =>
+      loan.borrowerFamilyId === state.family.id && loan.status === 'completed');
+
+    expect(state.version).toBe(4);
+    expect(state.circleMembers).toHaveLength(state.community.memberCount);
+    expect(completedBorrowing).toHaveLength(state.family.successfulLoans);
+    expect(completedBorrowing.every((loan) =>
+      state.books.some((book) => book.id === loan.bookId)
+      && Boolean(loan.borrowerMarkedReturnedAt)
+      && Boolean(loan.lenderConfirmedReturnedAt))).toBe(true);
+  });
+
   it('calculates a family queue position by request time', () => {
     const state = createDemoState(NOW);
     expect(queuePosition(state.requests, 'request-gruffalo-current')).toBe(2);

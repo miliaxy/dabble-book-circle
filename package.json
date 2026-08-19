@@ -4,17 +4,20 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "prepare:ocr": "node scripts/prepare-ocr-assets.mjs",
+    "dev": "pnpm prepare:ocr && vite",
+    "build": "pnpm prepare:ocr && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.0",
+    "@tesseract.js-data/eng": "^1.0.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.2"
+    "react-router-dom": "^7.18.2",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",

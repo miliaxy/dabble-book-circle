@@ -1,5 +1,5 @@
 import { type FormEvent, useMemo, useState } from 'react';
-import { findBookMatch } from '../bookLookup';
+import { findBookMatch, findBookMatchFromCoverText, isPossibleIsbn, normalizeIsbn, type BookMatch } from '../bookLookup';
 import { BookCover } from '../components/BookCover';
 import { HandoverContactDialog, LoanFeedbackDialog } from '../components/LoanDialogs';
 import { Modal } from '../components/Modal';
@@ -188,33 +188,69 @@ function AddBook({ onClose }: { onClose: () => void }) {
   const [language, setLanguage] = useState<BookLanguage>('English');
   const [condition, setCondition] = useState<BookCondition>('Good');
   const [lookupState, setLookupState] = useState<'idle' | 'loading' | 'found' | 'missing' | 'error'>('idle');
+  const [scanState, setScanState] = useState<'idle' | 'scanning' | 'found' | 'missing' | 'error'>('idle');
+  const [scanProgress, setScanProgress] = useState(0);
   const [error, setError] = useState('');
+
+  function applyMatch(match: BookMatch) {
+    setTitle(match.title);
+    setAuthor(match.author);
+    setDescription(match.description);
+    if (match.isbn) setIsbn(match.isbn);
+  }
+
+  async function scanPhoto(source: string) {
+    setScanState('scanning');
+    setScanProgress(0);
+    try {
+      const { readBookCoverText } = await import('../photoRecognition');
+      const coverText = await readBookCoverText(source, ({ progress }) => setScanProgress(progress));
+      const match = await findBookMatchFromCoverText(coverText);
+      if (!match) {
+        setScanState('missing');
+        return;
+      }
+      applyMatch(match);
+      setLookupState('found');
+      setScanState('found');
+    } catch {
+      setScanState('error');
+    }
+  }
 
   async function loadPhoto(file?: File) {
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setError('Choose a photo of the book cover.'); return; }
+    if (file.type && !file.type.startsWith('image/')) { setError('Choose a photo of the book cover.'); return; }
     if (file.size > 12 * 1024 * 1024) { setError('The photo is too large. Choose one under 12 MB.'); return; }
     setError('');
-    setPhoto(await compressImage(file));
+    try {
+      const preparedPhoto = await compressImage(file);
+      setPhoto(preparedPhoto);
+      await scanPhoto(preparedPhoto);
+    } catch {
+      setError('We could not open that photo. Try a JPG, PNG or a new camera photo.');
+      setScanState('error');
+    }
   }
 
   async function findDetails() {
     if (!title.trim() && !isbn.trim()) { setError('Add the title or ISBN before looking up details.'); return; }
+    if (isbn.trim() && !isPossibleIsbn(isbn)) { setError('Enter the 10- or 13-digit ISBN printed near the barcode.'); return; }
     setError(''); setLookupState('loading');
     try {
       const match = await findBookMatch({ title, author, isbn });
       if (!match) { setLookupState('missing'); return; }
-      setTitle(match.title); setAuthor(match.author); setDescription(match.description); if (match.isbn) setIsbn(match.isbn); setLookupState('found');
+      applyMatch(match); setLookupState('found');
     } catch { setLookupState('error'); }
   }
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    if (!photo) { setError('Start by taking or choosing a cover photo.'); return; }
+    const cleanIsbn = normalizeIsbn(isbn);
+    if (!photo && !cleanIsbn) { setError('Add either a cover photo or an ISBN.'); return; }
     if (!title.trim()) { setError('Confirm the book title.'); return; }
-    const cleanIsbn = isbn.replace(/[^0-9X]/gi, '');
     dispatch({ type: 'ADD_BOOK', book: {
-      id: newId('book'), title: title.trim(), author: author.trim() || 'Author not listed', description: description.trim() || 'Shared by a family in your private Book Circle.', ownerFamilyId: state.family.id, ownerName: state.family.displayName, ageBand, category, language, condition, available: true, coverImage: photo, coverEmoji: '📘', coverStyle: 'mint-sky', isbn: cleanIsbn || undefined, goodreadsUrl: cleanIsbn ? `https://www.goodreads.com/book/isbn/${encodeURIComponent(cleanIsbn)}` : goodreadsSearchUrl(title, author), createdAt: new Date().toISOString(),
+      id: newId('book'), title: title.trim(), author: author.trim() || 'Author not listed', description: description.trim() || 'Shared by a family in your private Book Circle.', ownerFamilyId: state.family.id, ownerName: state.family.displayName, ageBand, category, language, condition, available: true, coverImage: photo || undefined, coverEmoji: '📘', coverStyle: 'mint-sky', isbn: cleanIsbn || undefined, goodreadsUrl: cleanIsbn ? `https://www.goodreads.com/book/isbn/${encodeURIComponent(cleanIsbn)}` : goodreadsSearchUrl(title, author), createdAt: new Date().toISOString(),
     } });
     onClose();
   }
@@ -227,15 +263,15 @@ function AddBook({ onClose }: { onClose: () => void }) {
             {photo ? <img src={photo} alt="Book cover preview" /> : <><span className="camera-icon" aria-hidden="true">📷</span><strong>Photograph the front cover</strong><small>Use your camera or choose an existing photo</small></>}
             <input type="file" accept="image/*" capture="environment" onChange={(event) => void loadPhoto(event.target.files?.[0])} />
           </label>
-          <div className="photo-help"><span aria-hidden="true">✨</span><p><strong>Photo-first listing</strong><br />Cover recognition will be completed through the private backend. For this preview, confirm the title below.</p></div>
+          <div className={`photo-help photo-help-${scanState}`}><span aria-hidden="true">✨</span><div><p><strong>{scanState === 'scanning' ? 'Reading the cover…' : scanState === 'found' ? 'Book details found' : 'Photo-first listing'}</strong><br />{scanState === 'scanning' ? `The photo stays on this device while we read it. ${Math.round(scanProgress * 100)}%` : scanState === 'found' ? 'Please confirm the suggested title and author below.' : scanState === 'missing' ? 'We could not identify this cover. Type the title or ISBN below.' : scanState === 'error' ? 'Automatic scanning is unavailable. You can still use the photo and enter the title or ISBN.' : 'Take a clear, straight-on photo and we will suggest the title and author.'}</p>{photo && scanState !== 'scanning' && <button type="button" onClick={() => void scanPhoto(photo)}>Scan photo again</button>}</div></div>
         </section>
 
         <section className="book-fields">
           <div className="field-grid"><label>Book title <b>*</b><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. The Wild Robot" /></label><label>Author<input value={author} onChange={(event) => setAuthor(event.target.value)} placeholder="e.g. Peter Brown" /></label></div>
-          <div className="lookup-row"><label>ISBN, if visible<input inputMode="numeric" value={isbn} onChange={(event) => setIsbn(event.target.value)} placeholder="Back-cover barcode number" /></label><button className="button button-quiet" type="button" disabled={lookupState === 'loading'} onClick={() => void findDetails()}>{lookupState === 'loading' ? 'Finding…' : 'Find book details'}</button></div>
+          <div className="lookup-row"><label>ISBN<input inputMode="text" value={isbn} onChange={(event) => setIsbn(event.target.value)} placeholder="10- or 13-digit barcode number" /></label><button className="button button-quiet" type="button" disabled={lookupState === 'loading'} onClick={() => void findDetails()}>{lookupState === 'loading' ? 'Finding…' : 'Find book details'}</button></div>
           {lookupState === 'found' && <p className="lookup-message success">✓ Details found. Please confirm they match your copy.</p>}
-          {lookupState === 'missing' && <p className="lookup-message">We could not find an exact match. You can still list the book.</p>}
-          {lookupState === 'error' && <p className="lookup-message">Lookup is unavailable. You can still list the book.</p>}
+          {lookupState === 'missing' && <p className="lookup-message">We could not find an exact match. Check the ISBN or enter the title manually.</p>}
+          {lookupState === 'error' && <p className="lookup-message">Lookup is temporarily unavailable. You can still list the book using its photo and title.</p>}
           <label>Description<textarea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} placeholder="A short description helps other parents." /></label>
           <div className="field-grid field-grid-three"><label>Reader age<select value={ageBand} onChange={(event) => setAgeBand(event.target.value as AgeBand)}>{ages.map((value) => <option key={value}>{value}</option>)}</select></label><label>Language<select value={language} onChange={(event) => setLanguage(event.target.value as BookLanguage)}>{languages.map((value) => <option key={value}>{value}</option>)}</select></label><label>Condition<select value={condition} onChange={(event) => setCondition(event.target.value as BookCondition)}>{conditions.map((value) => <option key={value}>{value}</option>)}</select></label></div>
           <label>Book type<select value={category} onChange={(event) => setCategory(event.target.value as BookCategory)}>{categories.map((value) => <option key={value}>{value}</option>)}</select></label>
