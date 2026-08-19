@@ -281,10 +281,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .book-card-copy { display: block; padding: 14px 2px 3px; }
 .book-card-topline { min-height: 23px; display: flex; align-items: center; justify-content: space-between; gap: 5px; margin-bottom: 8px; }
 .queue-count { color: var(--muted); font-size: 8px; font-weight: 700; }
-.book-card-copy > strong, .book-author, .book-meta { display: block; }
+.book-card-copy > strong, .book-author, .book-series, .book-meta { display: block; }
 .book-card-copy > strong { min-height: 38px; overflow: hidden; color: var(--slate); font-family: 'Nunito', sans-serif; font-size: 14px; line-height: 1.25; }
 .book-author { margin-top: 3px; overflow: hidden; color: var(--muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.book-meta { margin-top: 11px; color: #91a0ad; font-size: 9px; }
+.book-series { width: fit-content; max-width: 100%; margin-top: 7px; overflow: hidden; padding: 4px 7px; border-radius: 999px; color: var(--purple); background: var(--purple-light); font-size: 8px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.book-meta { margin-top: 9px; color: #91a0ad; font-size: 9px; }
 .screen > .cross-promo-compact { display: none; margin: 45px 0 0; }
 .cross-promo-compact { margin: 45px 0 0; padding: 18px 21px; }
 .empty-state { padding: 55px 24px; border: 1px dashed #d8e2e8; border-radius: var(--radius); background: white; text-align: center; }
@@ -305,6 +306,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .detail-status-row { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 10px; }
 .book-detail-copy h3 { font-size: 29px; line-height: 1.07; margin: 12px 0 2px; }
 .detail-author { color: var(--muted); font-size: 13px; }
+.detail-series { display: inline-flex; align-items: center; gap: 7px; margin: -3px 0 12px; padding: 6px 9px; border-radius: 999px; color: var(--purple); background: var(--purple-light); font-size: 9px; font-weight: 800; }
+.detail-series span { color: #8e7aa9; font-size: 7px; letter-spacing: .4px; text-transform: uppercase; }
 .detail-description { color: #687a89; font-size: 12px; line-height: 1.65; }
 .detail-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; margin: 21px 0; }
 .detail-list div { border-top: 1px solid var(--line); padding-top: 8px; }
@@ -413,6 +416,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .photo-help-found { background: var(--teal-light); color: var(--teal-dark); }
 .book-fields label { margin-top: 12px; }
 .book-fields label b { color: var(--peach-dark); }
+.book-fields label small { color: var(--muted); font-size: 9px; font-weight: 500; }
 .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .field-grid-three { grid-template-columns: repeat(3, 1fr); }
 .lookup-row { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 11px; }

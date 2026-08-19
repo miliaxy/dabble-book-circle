@@ -3,6 +3,7 @@ import {
   coverSearchText,
   findBookMatch,
   findBookMatchFromCoverText,
+  inferSeriesDetails,
   isPossibleIsbn,
   normalizeIsbn,
 } from './bookLookup';
@@ -21,6 +22,18 @@ describe('book lookup', () => {
 
   it('turns noisy OCR lines into a bounded book-search query', () => {
     expect(coverSearchText('  THE WILD ROBOT !!\nPeter Brown\n\n@@ ')).toBe('THE WILD ROBOT Peter Brown');
+  });
+
+  it('prefills series only when metadata contains an explicit series marker', () => {
+    expect(inferSeriesDetails('The Bad Guys', 'Episode 2')).toEqual({
+      seriesName: 'The Bad Guys',
+      seriesNumber: '2',
+    });
+    expect(inferSeriesDetails('Dog Man # 3')).toEqual({
+      seriesName: 'Dog Man',
+      seriesNumber: '3',
+    });
+    expect(inferSeriesDetails('Matilda')).toEqual({});
   });
 
   it('finds book details using an ISBN', async () => {

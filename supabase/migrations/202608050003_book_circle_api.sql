@@ -308,6 +308,8 @@ create or replace function public.create_book_listing(
   p_title text,
   p_author text,
   p_description text,
+  p_series_name text,
+  p_series_number text,
   p_isbn text,
   p_goodreads_url text,
   p_metadata_source text,
@@ -338,7 +340,9 @@ begin
     raise exception 'Book title is required';
   end if;
   if char_length(coalesce(p_author, '')) > 200
-    or char_length(coalesce(p_description, '')) > 2000 then
+    or char_length(coalesce(p_description, '')) > 2000
+    or char_length(coalesce(p_series_name, '')) > 200
+    or char_length(coalesce(p_series_number, '')) > 40 then
     raise exception 'Book metadata is too long';
   end if;
   if v_isbn is not null and v_isbn !~ '^[0-9X]{10,13}$' then
@@ -367,6 +371,8 @@ begin
       title,
       author,
       description,
+      series_name,
+      series_number,
       isbn_normalized,
       goodreads_url,
       metadata_source,
@@ -376,19 +382,26 @@ begin
       btrim(p_title),
       btrim(coalesce(p_author, '')),
       btrim(coalesce(p_description, '')),
+      nullif(btrim(p_series_name), ''),
+      nullif(btrim(p_series_number), ''),
       v_isbn,
       nullif(btrim(p_goodreads_url), ''),
       p_metadata_source,
       v_family_id
     )
     on conflict (isbn_normalized) where isbn_normalized is not null
-    do update set isbn_normalized = excluded.isbn_normalized
+    do update set
+      isbn_normalized = excluded.isbn_normalized,
+      series_name = coalesce(public.book_titles.series_name, excluded.series_name),
+      series_number = coalesce(public.book_titles.series_number, excluded.series_number)
     returning id into v_book_title_id;
   else
     insert into public.book_titles (
       title,
       author,
       description,
+      series_name,
+      series_number,
       goodreads_url,
       metadata_source,
       created_by_family_id
@@ -397,6 +410,8 @@ begin
       btrim(p_title),
       btrim(coalesce(p_author, '')),
       btrim(coalesce(p_description, '')),
+      nullif(btrim(p_series_name), ''),
+      nullif(btrim(p_series_number), ''),
       nullif(btrim(p_goodreads_url), ''),
       p_metadata_source,
       v_family_id
@@ -1203,6 +1218,8 @@ returns table (
   title text,
   author text,
   description text,
+  series_name text,
+  series_number text,
   isbn_normalized text,
   goodreads_url text,
   owner_family_id uuid,
@@ -1235,6 +1252,8 @@ begin
     bt.title,
     bt.author,
     bt.description,
+    bt.series_name,
+    bt.series_number,
     bt.isbn_normalized,
     bt.goodreads_url,
     bc.owner_family_id,
@@ -1282,7 +1301,7 @@ revoke all on function public.bootstrap_parent(text, text, text) from public, an
 revoke all on function public.create_circle_invitation(uuid, text, timestamptz) from public, anon;
 revoke all on function public.redeem_circle_invitation(text) from public, anon;
 revoke all on function public.create_book_listing(
-  uuid, text, text, text, text, text, text,
+  uuid, text, text, text, text, text, text, text, text,
   public.age_band, public.book_category, public.book_language, public.book_condition, text
 ) from public, anon;
 revoke all on function public.attach_book_photo(uuid, text) from public, anon;
@@ -1306,7 +1325,7 @@ grant execute on function public.bootstrap_parent(text, text, text) to authentic
 grant execute on function public.create_circle_invitation(uuid, text, timestamptz) to authenticated;
 grant execute on function public.redeem_circle_invitation(text) to authenticated;
 grant execute on function public.create_book_listing(
-  uuid, text, text, text, text, text, text,
+  uuid, text, text, text, text, text, text, text, text,
   public.age_band, public.book_category, public.book_language, public.book_condition, text
 ) to authenticated;
 grant execute on function public.attach_book_photo(uuid, text) to authenticated;

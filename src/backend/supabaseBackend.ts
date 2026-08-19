@@ -131,6 +131,8 @@ export class SupabaseBookCircleBackend implements BookCircleBackend {
       p_title: input.title,
       p_author: input.author ?? '',
       p_description: input.description ?? '',
+      p_series_name: input.seriesName ?? '',
+      p_series_number: input.seriesNumber ?? '',
       p_isbn: input.isbn ?? '',
       p_goodreads_url: input.goodreadsUrl ?? '',
       p_metadata_source: input.metadataSource,

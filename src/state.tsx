@@ -26,21 +26,29 @@ function readInitialState() {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (!stored) return createDemoState();
     const parsed = JSON.parse(stored) as AppState;
-    if (parsed.version === 4) return parsed;
-    if (parsed.version === 2 || parsed.version === 3) {
+    if (parsed.version === 5) return parsed;
+    if (parsed.version === 2 || parsed.version === 3 || parsed.version === 4) {
       const upgraded = createDemoState();
+      const upgradedBooks = parsed.books.map((book) => {
+        const reference = upgraded.books.find((candidate) => candidate.id === book.id);
+        return {
+          ...book,
+          seriesName: book.seriesName ?? reference?.seriesName,
+          seriesNumber: book.seriesNumber ?? reference?.seriesNumber,
+        };
+      });
       return {
         ...upgraded,
         ...parsed,
-        version: 4,
+        version: 5,
         community: {
           ...parsed.community,
           role: parsed.community.role ?? 'admin' as const,
           memberCount: Math.max(parsed.community.memberCount ?? 0, upgraded.community.memberCount),
         },
         books: [
-          ...parsed.books,
-          ...upgraded.books.filter((book) => !parsed.books.some((existing) => existing.id === book.id)),
+          ...upgradedBooks,
+          ...upgraded.books.filter((book) => !upgradedBooks.some((existing) => existing.id === book.id)),
         ],
         loans: [
           ...parsed.loans,

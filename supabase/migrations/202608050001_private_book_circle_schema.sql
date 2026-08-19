@@ -140,6 +140,8 @@ create table public.book_titles (
   title text not null check (char_length(btrim(title)) between 1 and 240),
   author text not null default '' check (char_length(author) <= 200),
   description text not null default '' check (char_length(description) <= 2000),
+  series_name text check (series_name is null or char_length(series_name) between 1 and 200),
+  series_number text check (series_number is null or char_length(series_number) between 1 and 40),
   isbn_normalized text check (isbn_normalized is null or isbn_normalized ~ '^[0-9X]{10,13}$'),
   goodreads_url text check (
     goodreads_url is null
@@ -159,7 +161,7 @@ create unique index book_titles_unique_isbn_idx
   where isbn_normalized is not null;
 create index book_titles_search_idx
   on public.book_titles using gin (
-    to_tsvector('simple', coalesce(title, '') || ' ' || coalesce(author, ''))
+    to_tsvector('simple', coalesce(title, '') || ' ' || coalesce(author, '') || ' ' || coalesce(series_name, ''))
   );
 
 create table public.book_copies (

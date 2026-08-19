@@ -6,6 +6,8 @@ import { Modal } from '../components/Modal';
 import { StatusPill } from '../components/StatusPill';
 import {
   activeLoanForBook,
+  bookMatchesQuery,
+  bookSeriesLabel,
   displayStatus,
   dueLabel,
   formatDateIST,
@@ -37,7 +39,7 @@ export function Browse() {
       .filter((book) => book.ownerFamilyId !== state.family.id)
       .filter((book) => age === 'All ages' || book.ageBand === age)
       .filter((book) => !availableOnly || displayStatus(book, state.requests, state.loans) === 'available')
-      .filter((book) => !normalized || [book.title, book.author, book.category, book.language].join(' ').toLowerCase().includes(normalized))
+      .filter((book) => bookMatchesQuery(book, normalized))
       .sort((a, b) => {
         const aAvailable = displayStatus(a, state.requests, state.loans) === 'available' ? 0 : 1;
         const bAvailable = displayStatus(b, state.requests, state.loans) === 'available' ? 0 : 1;
@@ -60,7 +62,7 @@ export function Browse() {
       )}
 
       <section className="search-panel" aria-label="Search books">
-        <label className="search-input"><span aria-hidden="true">⌕</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search title, author or topic" /></label>
+        <label className="search-input"><span aria-hidden="true">⌕</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search title, author, series or topic" /></label>
         <div className="filter-row">
           <div className="filter-scroll" aria-label="Filter by age">
             {ageFilters.map((filter) => <button className={age === filter ? 'filter-chip active' : 'filter-chip'} type="button" key={filter} onClick={() => setAge(filter)}>{filter}</button>)}
@@ -93,6 +95,7 @@ function BookDetails({ book, onClose }: { book: BookCopy; onClose: () => void })
   const queue = waitingRequestsForBook(state.requests, book.id);
   const activeLoan = activeLoanForBook(state.loans, book.id);
   const borrowedByCurrentFamily = activeLoan?.borrowerFamilyId === state.family.id;
+  const series = bookSeriesLabel(book);
 
   function requestBook() {
     dispatch({
@@ -114,7 +117,7 @@ function BookDetails({ book, onClose }: { book: BookCopy; onClose: () => void })
         <BookCover book={book} size="large" />
         <div className="book-detail-copy">
           <div className="detail-status-row"><StatusPill status={status} />{queue.length > 0 && <span>{queue.length} {queue.length === 1 ? 'family' : 'families'} waiting</span>}</div>
-          <h3>{book.title}</h3><p className="detail-author">by {book.author}</p><p className="detail-description">{book.description}</p>
+          <h3>{book.title}</h3><p className="detail-author">by {book.author}</p>{series && <p className="detail-series"><span>Series</span>{series}</p>}<p className="detail-description">{book.description}</p>
           <dl className="detail-list"><div><dt>For readers</dt><dd>{book.ageBand} years</dd></div><div><dt>Type</dt><dd>{book.category}</dd></div><div><dt>Language</dt><dd>{book.language}</dd></div><div><dt>Condition</dt><dd>{book.condition}</dd></div></dl>
           <div className="owner-line"><span className="owner-avatar">{book.ownerName.charAt(0)}</span><div><small>Shared by</small><strong>{book.ownerName}</strong></div><span className="reliability-mini">✓ Trusted circle member</span></div>
           {book.goodreadsUrl && <a className="goodreads-link" href={book.goodreadsUrl} target="_blank" rel="noreferrer"><span aria-hidden="true">g</span> Find on Goodreads <b aria-hidden="true">↗</b></a>}

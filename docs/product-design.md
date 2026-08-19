@@ -21,7 +21,7 @@ Parents manage accounts, books, requests, handovers, and returns. There are no c
 
 1. **Trusted before broad.** Books and family identities are visible only inside approved, invite-only circles.
 2. **Easy enough for a phone.** Primary actions must work comfortably from a parent's phone with clear touch targets and minimal typing.
-3. **Photo or ISBN first.** A parent can photograph a cover or enter an ISBN; the system suggests metadata, and the parent confirms it.
+3. **Photo or ISBN first.** A parent can photograph a cover or enter an ISBN; the system suggests metadata, including explicit series information when available, and the parent confirms it.
 4. **Clear ownership and accountability.** Every request, handover, receipt, due date, return, and confirmation has an explicit state and timestamp.
 5. **Family-level identity.** Reliability belongs to the family household, never to a child.
 6. **Privacy at the point of need.** Contact details appear only to matched families during an active handover or loan.
@@ -111,9 +111,9 @@ The interface shares Dabble's friendly, optimistic visual language while giving 
 ### Browse
 
 - Lead with a personalised parent greeting and a compact borrowing-due card when relevant.
-- Search supports title and author; filters support age and immediate availability.
-- Book cards show cover, title, author, age, language, and circulation state.
-- Book details show the sharing family, condition, description, Goodreads link, availability, and request action.
+- Search supports title, author, series, and topic; filters support age and immediate availability.
+- Book cards show cover, title, author, series name and book number when applicable, age, language, and circulation state.
+- Book details show the series when applicable, sharing family, condition, description, Goodreads link, availability, and request action.
 - A family cannot request its own book or enter the same queue twice.
 
 ### My Books
@@ -124,6 +124,7 @@ The interface shares Dabble's friendly, optimistic visual language while giving 
 - Adding a book supports either:
   - a cover photo scanned on-device in English or Hindi, followed by suggested metadata; or
   - a 10- or 13-digit ISBN lookup without requiring a photo.
+- Parents can record an optional series name and book number. Metadata may prefill these only when an explicit series marker is available; the parent remains responsible for confirmation or correction.
 - The photo remains in the browser during recognition. Parents can correct every suggested field or enter details manually when recognition fails.
 - Each book can be made unavailable to new requests while preserving its listing and existing queue.
 - Lenders can inspect the ordered queue, accept the first request, or decline any request with a reason shared with the requester.

@@ -4,6 +4,8 @@ import {
   activeLoanForBook,
   addSevenDays,
   appReducer,
+  bookMatchesQuery,
+  bookSeriesLabel,
   displayStatus,
   queuePosition,
   waitingRequestsForBook,
@@ -12,13 +14,29 @@ import {
 const NOW = new Date('2026-08-05T12:00:00.000Z');
 
 describe('borrowing rules', () => {
+  it('formats a series label with or without a book number', () => {
+    expect(bookSeriesLabel({ seriesName: 'Dog Man', seriesNumber: '3' })).toBe('Dog Man · Book 3');
+    expect(bookSeriesLabel({ seriesName: 'Amar Chitra Katha' })).toBe('Amar Chitra Katha');
+    expect(bookSeriesLabel({})).toBe('');
+  });
+
+  it('finds a book by its series name', () => {
+    const book = createDemoState(NOW).books.find((candidate) => candidate.id === 'book-geronimo')!;
+    expect(bookMatchesQuery(book, 'Geronimo Stilton')).toBe(true);
+    expect(bookMatchesQuery(book, 'Magic Tree House')).toBe(false);
+  });
+
   it('keeps the preview counts backed by complete member and borrowing records', () => {
     const state = createDemoState(NOW);
     const completedBorrowing = state.loans.filter((loan) =>
       loan.borrowerFamilyId === state.family.id && loan.status === 'completed');
 
-    expect(state.version).toBe(4);
+    expect(state.version).toBe(5);
     expect(state.circleMembers).toHaveLength(state.community.memberCount);
+    expect(state.books.find((book) => book.id === 'book-geronimo')).toMatchObject({
+      seriesName: 'Geronimo Stilton',
+      seriesNumber: '1',
+    });
     expect(completedBorrowing).toHaveLength(state.family.successfulLoans);
     expect(completedBorrowing.every((loan) =>
       state.books.some((book) => book.id === loan.bookId)

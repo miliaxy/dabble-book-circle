@@ -44,6 +44,8 @@ export interface BookCopy {
   coverEmoji: string;
   coverStyle: string;
   isbn?: string;
+  seriesName?: string;
+  seriesNumber?: string;
   goodreadsUrl?: string;
   createdAt: string;
 }

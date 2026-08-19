@@ -23,6 +23,8 @@ export interface CircleBookRecord {
   title: string;
   author: string;
   description: string;
+  series_name: string | null;
+  series_number: string | null;
   isbn_normalized: string | null;
   goodreads_url: string | null;
   owner_family_id: string;
@@ -43,6 +45,8 @@ export interface CreateBookListingInput {
   title: string;
   author?: string;
   description?: string;
+  seriesName?: string;
+  seriesNumber?: string;
   isbn?: string;
   goodreadsUrl?: string;
   metadataSource: 'parent' | 'google_books' | 'open_library';

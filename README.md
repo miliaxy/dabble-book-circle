@@ -9,7 +9,7 @@ This repository currently contains the interactive frontend foundation:
 - public Book Circle introduction and Dabble Activities cross-promotion;
 - invite-only and returning-parent access previews;
 - parent and family-level identity only—no child accounts;
-- private-circle book browsing, filters, and Goodreads links;
+- private-circle book browsing, series labels/search, filters, and Goodreads links;
 - photo-first English/Hindi cover recognition and ISBN-based metadata lookup;
 - fair request queues and lender acceptance;
 - handover and borrower receipt confirmation;

@@ -5,7 +5,7 @@ import { HandoverContactDialog, LoanFeedbackDialog } from '../components/LoanDia
 import { Modal } from '../components/Modal';
 import { StatusPill } from '../components/StatusPill';
 import { goodreadsSearchUrl } from '../data';
-import { activeLoanForBook, displayStatus, dueLabel, formatDateIST, waitingRequestsForBook } from '../domain';
+import { activeLoanForBook, bookSeriesLabel, displayStatus, dueLabel, formatDateIST, waitingRequestsForBook } from '../domain';
 import { compressImage } from '../image';
 import { newId, useApp } from '../state';
 import type { AgeBand, BookCategory, BookCondition, BookLanguage, BorrowRequest, Loan } from '../types';
@@ -91,7 +91,7 @@ export function MyBooks() {
             return (
               <article className="owned-book-row" key={book.id}>
                 <BookCover book={book} size="small" />
-                <div className="owned-book-copy"><div><StatusPill status={status} />{queue.length > 0 && <span className="queue-count">{queue.length} {queue.length === 1 ? 'family' : 'families'} waiting</span>}</div><h3>{book.title}</h3><p>{book.author} · {book.condition}</p>{activeLoan && <small>With {activeLoan.borrowerName}</small>}</div>
+                <div className="owned-book-copy"><div><StatusPill status={status} />{queue.length > 0 && <span className="queue-count">{queue.length} {queue.length === 1 ? 'family' : 'families'} waiting</span>}</div><h3>{book.title}</h3><p>{[book.author, bookSeriesLabel(book), book.condition].filter(Boolean).join(' · ')}</p>{activeLoan && <small>With {activeLoan.borrowerName}</small>}</div>
                 <div className="owned-book-actions">
                   {queue.length > 0 && <button className="button button-quiet button-small" type="button" aria-expanded={queueOpen} aria-controls={`queue-${book.id}`} onClick={() => setExpandedQueueBookId(queueOpen ? null : book.id)}>{queueOpen ? 'Hide queue' : `View queue (${queue.length})`}</button>}
                   <label className={`switch-control${activeLoan ? ' disabled' : ''}`}><input type="checkbox" checked={book.available} disabled={Boolean(activeLoan)} aria-label={`${book.available ? 'Stop' : 'Start'} lending ${book.title}`} onChange={() => dispatch({ type: 'TOGGLE_BOOK', bookId: book.id })} /><span /><small>{activeLoan ? 'Unavailable during loan' : book.available ? 'Available to borrow' : 'Not available to borrow'}</small></label>
@@ -182,6 +182,8 @@ function AddBook({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [isbn, setIsbn] = useState('');
+  const [seriesName, setSeriesName] = useState('');
+  const [seriesNumber, setSeriesNumber] = useState('');
   const [description, setDescription] = useState('');
   const [ageBand, setAgeBand] = useState<AgeBand>('6–8');
   const [category, setCategory] = useState<BookCategory>('Chapter book');
@@ -197,6 +199,8 @@ function AddBook({ onClose }: { onClose: () => void }) {
     setAuthor(match.author);
     setDescription(match.description);
     if (match.isbn) setIsbn(match.isbn);
+    if (match.seriesName) setSeriesName(match.seriesName);
+    if (match.seriesNumber) setSeriesNumber(match.seriesNumber);
   }
 
   async function scanPhoto(source: string) {
@@ -250,7 +254,7 @@ function AddBook({ onClose }: { onClose: () => void }) {
     if (!photo && !cleanIsbn) { setError('Add either a cover photo or an ISBN.'); return; }
     if (!title.trim()) { setError('Confirm the book title.'); return; }
     dispatch({ type: 'ADD_BOOK', book: {
-      id: newId('book'), title: title.trim(), author: author.trim() || 'Author not listed', description: description.trim() || 'Shared by a family in your private Book Circle.', ownerFamilyId: state.family.id, ownerName: state.family.displayName, ageBand, category, language, condition, available: true, coverImage: photo || undefined, coverEmoji: '📘', coverStyle: 'mint-sky', isbn: cleanIsbn || undefined, goodreadsUrl: cleanIsbn ? `https://www.goodreads.com/book/isbn/${encodeURIComponent(cleanIsbn)}` : goodreadsSearchUrl(title, author), createdAt: new Date().toISOString(),
+      id: newId('book'), title: title.trim(), author: author.trim() || 'Author not listed', description: description.trim() || 'Shared by a family in your private Book Circle.', ownerFamilyId: state.family.id, ownerName: state.family.displayName, ageBand, category, language, condition, available: true, coverImage: photo || undefined, coverEmoji: '📘', coverStyle: 'mint-sky', isbn: cleanIsbn || undefined, seriesName: seriesName.trim() || undefined, seriesNumber: seriesNumber.trim() || undefined, goodreadsUrl: cleanIsbn ? `https://www.goodreads.com/book/isbn/${encodeURIComponent(cleanIsbn)}` : goodreadsSearchUrl(title, author), createdAt: new Date().toISOString(),
     } });
     onClose();
   }
@@ -268,6 +272,7 @@ function AddBook({ onClose }: { onClose: () => void }) {
 
         <section className="book-fields">
           <div className="field-grid"><label>Book title <b>*</b><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. The Wild Robot" /></label><label>Author<input value={author} onChange={(event) => setAuthor(event.target.value)} placeholder="e.g. Peter Brown" /></label></div>
+          <div className="field-grid series-field-grid"><label><span>Series <small>(optional)</small></span><input value={seriesName} onChange={(event) => setSeriesName(event.target.value)} placeholder="e.g. The Wild Robot" /></label><label><span>Book number <small>(optional)</small></span><input inputMode="decimal" value={seriesNumber} onChange={(event) => setSeriesNumber(event.target.value)} placeholder="e.g. 1" /></label></div>
           <div className="lookup-row"><label>ISBN<input inputMode="text" value={isbn} onChange={(event) => setIsbn(event.target.value)} placeholder="10- or 13-digit barcode number" /></label><button className="button button-quiet" type="button" disabled={lookupState === 'loading'} onClick={() => void findDetails()}>{lookupState === 'loading' ? 'Finding…' : 'Find book details'}</button></div>
           {lookupState === 'found' && <p className="lookup-message success">✓ Details found. Please confirm they match your copy.</p>}
           {lookupState === 'missing' && <p className="lookup-message">We could not find an exact match. Check the ISBN or enter the title manually.</p>}

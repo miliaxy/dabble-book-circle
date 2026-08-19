@@ -54,6 +54,16 @@ describe('production database security contract', () => {
     expect(apiMigration).toContain("v_due_at := v_received_at + interval '7 days';");
   });
 
+  it('persists optional series metadata and exposes it in the private catalog', () => {
+    expect(schemaMigration).toContain('series_name text');
+    expect(schemaMigration).toContain('series_number text');
+    expect(schemaMigration).toContain("coalesce(series_name, '')");
+    expect(apiMigration).toContain('p_series_name text');
+    expect(apiMigration).toContain('p_series_number text');
+    expect(apiMigration).toContain('bt.series_name');
+    expect(apiMigration).toContain('bt.series_number');
+  });
+
   it('stores only invitation hashes and keeps photos private', () => {
     expect(schemaMigration).toContain('token_hash text not null unique');
     expect(apiMigration).toContain("extensions.digest(v_token, 'sha256')");

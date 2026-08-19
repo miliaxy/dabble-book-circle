@@ -59,6 +59,26 @@ export function addSevenDays(isoDate: string) {
   return new Date(new Date(isoDate).getTime() + 7 * DAY).toISOString();
 }
 
+export function bookSeriesLabel(book: Pick<BookCopy, 'seriesName' | 'seriesNumber'>) {
+  const name = book.seriesName?.trim();
+  if (!name) return '';
+  const number = book.seriesNumber?.trim();
+  return number ? `${name} · Book ${number}` : name;
+}
+
+export function bookMatchesQuery(
+  book: Pick<BookCopy, 'title' | 'author' | 'seriesName' | 'category' | 'language'>,
+  query: string,
+) {
+  const normalized = query.trim().toLocaleLowerCase();
+  if (!normalized) return true;
+  return [book.title, book.author, book.seriesName, book.category, book.language]
+    .filter(Boolean)
+    .join(' ')
+    .toLocaleLowerCase()
+    .includes(normalized);
+}
+
 export function formatDateIST(isoDate?: string) {
   if (!isoDate) return 'Not started';
   return new Intl.DateTimeFormat('en-IN', {

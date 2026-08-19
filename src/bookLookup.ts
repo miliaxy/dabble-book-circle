@@ -1,6 +1,7 @@
 interface GoogleBookVolume {
   volumeInfo?: {
     title?: string;
+    subtitle?: string;
     authors?: string[];
     description?: string;
     industryIdentifiers?: Array<{ type: string; identifier: string }>;
@@ -11,6 +12,7 @@ interface OpenLibraryBook {
   title?: string;
   authors?: Array<{ name?: string }>;
   notes?: string | { value?: string };
+  series?: string | string[];
 }
 
 export interface BookMatch {
@@ -18,6 +20,8 @@ export interface BookMatch {
   author: string;
   description: string;
   isbn?: string;
+  seriesName?: string;
+  seriesNumber?: string;
 }
 
 export function normalizeIsbn(value: string) {
@@ -34,16 +38,30 @@ function descriptionText(value: OpenLibraryBook['notes']) {
   return value?.value ?? '';
 }
 
+export function inferSeriesDetails(title: string, subtitle = '') {
+  const candidates = [title, subtitle ? `${title}: ${subtitle}` : ''].filter(Boolean);
+  for (const candidate of candidates) {
+    const explicitNumber = candidate.match(/^(.+?)(?:\s*[:;,–—-]\s*|\s+)(?:book|volume|vol\.?|episode|part)\s*#?\s*(\d+(?:\.\d+)?)(?:\b|$)/i)
+      ?? candidate.match(/^(.+?)\s+#\s*(\d+(?:\.\d+)?)(?:\b|$)/i);
+    if (explicitNumber?.[1] && explicitNumber[2]) {
+      return { seriesName: explicitNumber[1].trim(), seriesNumber: explicitNumber[2] };
+    }
+  }
+  return {};
+}
+
 function googleMatch(volume: GoogleBookVolume, fallbackAuthor = ''): BookMatch | null {
   const info = volume.volumeInfo;
   if (!info?.title) return null;
   const matchedIsbn = info.industryIdentifiers?.find((identifier) => identifier.type === 'ISBN_13')?.identifier
     ?? info.industryIdentifiers?.find((identifier) => identifier.type === 'ISBN_10')?.identifier;
+  const series = inferSeriesDetails(info.title, info.subtitle);
   return {
     title: info.title,
     author: info.authors?.join(', ') ?? fallbackAuthor,
     description: info.description?.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() ?? '',
     isbn: matchedIsbn,
+    ...series,
   };
 }
 
@@ -68,11 +86,15 @@ async function openLibraryIsbn(isbn: string): Promise<BookMatch | null> {
   if (!response.ok) throw new Error('Open Library lookup failed');
   const book = ((await response.json()) as Record<string, OpenLibraryBook>)[key];
   if (!book?.title) return null;
+  const rawSeries = Array.isArray(book.series) ? book.series[0] : book.series;
+  const series = rawSeries ? inferSeriesDetails(rawSeries) : {};
   return {
     title: book.title,
     author: book.authors?.map((candidate) => candidate.name).filter(Boolean).join(', ') ?? '',
     description: descriptionText(book.notes).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
     isbn,
+    seriesName: series.seriesName ?? rawSeries,
+    seriesNumber: series.seriesNumber,
   };
 }
 
