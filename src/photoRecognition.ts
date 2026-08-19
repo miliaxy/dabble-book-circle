@@ -11,7 +11,7 @@ export async function readBookCoverText(
 ) {
   const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, '');
   const assetRoot = `${baseUrl}/ocr`;
-  const worker = await createWorker('eng', 1, {
+  const worker = await createWorker(['eng', 'hin'], 1, {
     workerPath: `${assetRoot}/worker.min.js`,
     corePath: `${assetRoot}/core`,
     langPath: `${assetRoot}/lang`,

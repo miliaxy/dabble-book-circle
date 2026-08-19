@@ -11,7 +11,8 @@ const languageOutput = join(outputRoot, 'lang');
 const tesseractRoot = dirname(require.resolve('tesseract.js/package.json'));
 const tesseractRequire = createRequire(join(tesseractRoot, 'package.json'));
 const coreRoot = dirname(tesseractRequire.resolve('tesseract.js-core/package.json'));
-const languageRoot = dirname(require.resolve('@tesseract.js-data/eng/package.json'));
+const englishLanguageRoot = dirname(require.resolve('@tesseract.js-data/eng/package.json'));
+const hindiLanguageRoot = dirname(require.resolve('@tesseract.js-data/hin/package.json'));
 
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(coreOutput, { recursive: true });
@@ -28,6 +29,10 @@ for (const filename of [
 }
 
 await copyFile(
-  join(languageRoot, '4.0.0_best_int', 'eng.traineddata.gz'),
+  join(englishLanguageRoot, '4.0.0_best_int', 'eng.traineddata.gz'),
   join(languageOutput, 'eng.traineddata.gz'),
+);
+await copyFile(
+  join(hindiLanguageRoot, '4.0.0_best_int', 'hin.traineddata.gz'),
+  join(languageOutput, 'hin.traineddata.gz'),
 );
