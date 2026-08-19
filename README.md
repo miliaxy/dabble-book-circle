@@ -10,7 +10,7 @@ This repository currently contains the interactive frontend foundation:
 - invite-only and returning-parent access previews;
 - parent and family-level identity only—no child accounts;
 - private-circle book browsing, filters, and Goodreads links;
-- photo-first book listing with optional Google Books metadata lookup;
+- photo-first English/Hindi cover recognition and ISBN-based metadata lookup;
 - fair request queues and lender acceptance;
 - handover and borrower receipt confirmation;
 - seven-day loans beginning only after confirmed receipt;
@@ -57,7 +57,13 @@ pnpm test
 pnpm build
 ```
 
-The automated tests cover queue order, receipt-based due dates, lender-confirmed returns, request declines, invitation reissuing, access approvals, and administrator authorization.
+The automated tests cover book lookup, preview-data consistency, queue order, receipt-based due dates, lender-confirmed returns, request declines, invitation reissuing, access approvals, and administrator authorization.
+
+## Project working agreements
+
+- [`AGENTS.md`](AGENTS.md) requires tests for every behavior change and the complete verification suite before handoff.
+- [`docs/product-design.md`](docs/product-design.md) is the living source of truth for the current product and interface design and must change with every user-visible update.
+- Git and GitHub provide chronological implementation history during the pilot, so the project does not maintain a duplicate `CHANGELOG.md`.
 
 ## Production boundary
 
